@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOCU-GEN 333 | V6.5 PRO</title>
+    <style>
+        :root { --bg: #0f0f0f; --panel: #1a1a1a; --text: #e5e5e5; --accent: #e50914; --border: #333; --paper-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
+        body { margin: 0; font-family: 'Inter', 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        /* HEADER */
+        header { background: #000; padding: 10px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-weight: 800; letter-spacing: 2px; color: var(--accent); font-size: 1.2rem; }
+        .status-bar { font-size: 0.8rem; color: #666; display: flex; gap: 15px; }
+        .status-item.active { color: #0f0; }
+
+        /* MAIN WORKSPACE */
+        .workspace { display: flex; flex: 1; overflow: hidden; }
+
+        /* LEFT PANEL: INPUTS */
+        .panel-left { width: 320px; background: var(--panel); border-right: 1px solid var(--border); padding: 20px; overflow-y: auto; }
+        .input-group { margin-bottom: 20px; }
+        label { display: block; font-size: 0.7rem; color: #888; text-transform: uppercase; margin-bottom: 5px; font-weight: bold; }
+        input, textarea { width: 100%; background: #262626; border: 1px solid var(--border); color: white; padding: 10px; border-radius: 4px; box-sizing: border-box; font-size: 0.9rem; }
+        textarea { height: 80px; resize: none; }
+        h3 { font-size: 0.8rem; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-top: 25px; }
+
+        /* CENTER PANEL: THE PAPER */
+        .panel-center { flex: 1; background: #111; padding: 40px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; position: relative; }
+        
+        .toolbar { position: sticky; top: -20px; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); padding: 10px 20px; border-radius: 30px; border: 1px solid #444; display: flex; gap: 15px; margin-bottom: 30px; z-index: 10; box-shadow: var(--paper-shadow); }
+        .tool-btn { background: transparent; border: none; color: #ccc; cursor: pointer; font-weight: bold; font-size: 0.8rem; }
+        .tool-btn:hover { color: white; }
+        .btn-gen { background: var(--accent); color: white; padding: 8px 20px; border-radius: 20px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-gen:hover { transform: scale(1.05); background: #ff0a16; }
+
+        .paper { 
+            background: white; color: black; width: 21cm; min-height: 29.7cm; padding: 2.5cm; 
+            font-family: 'Courier New', Courier, monospace; font-size: 11pt; line-height: 1.2;
+            box-shadow: var(--paper-shadow); white-space: pre-wrap; outline: none; margin-bottom: 50px;
+        }
+
+        /* RIGHT PANEL: CHATBOT & BRAIN */
+        .panel-right { width: 300px; background: var(--panel); border-left: 1px solid var(--border); display: flex; flex-direction: column; }
+        .chat-history { flex: 1; padding: 15px; overflow-y: auto; font-size: 0.85rem; }
+        .msg { padding: 10px; margin-bottom: 10px; border-radius: 6px; }
+        .msg.ai { background: #333; color: #ddd; border-left: 3px solid var(--accent); }
+        .msg.user { background: var(--accent); color: white; text-align: right; }
+        
+        .chat-input-zone { padding: 15px; background: #222; border-top: 1px solid var(--border); }
+        .chat-btns { display: flex; gap: 5px; margin-top: 5px; }
+        .btn-chat { flex: 2; padding: 8px; background: var(--accent); border: none; color: white; border-radius: 4px; cursor: pointer; }
+        .btn-brain { flex: 1; padding: 8px; background: #444; border: none; color: white; border-radius: 4px; cursor: pointer; font-size: 0.7rem; }
+
+        /* TRIPTYQUE MODAL */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; justify-content: center; align-items: center; }
+        .triptyque-container { display: flex; gap: 20px; max-width: 1200px; padding: 20px; }
+        .angle-card { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; width: 350px; padding: 25px; transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; }
+        .angle-card:hover { border-color: var(--accent); transform: translateY(-10px); background: #222; }
+        .angle-card h2 { color: var(--accent); margin-top: 0; font-size: 1.2rem; }
+        .angle-card .type { font-size: 0.7rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; }
+        .angle-card .desc { font-size: 0.9rem; color: #ccc; line-height: 1.5; flex: 1; margin-bottom: 20px; }
+        .btn-select { background: var(--accent); color: white; border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+
+        /* LOADING OVERLAY */
+        #loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; }
+        .spinner { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--accent); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div id="loader">
+    <div class="spinner"></div>
+    <p style="margin-top:15px; letter-spacing:1px;" id="loader-text">Analyse des données...</p>
+</div>
+
+<header>
+    <div class="logo">DOCU-GEN 333+1</div>
+    <div class="status-bar">
+        <span class="status-item active">● BRIDGE CONNECTÉ</span>
+        <span class="status-item">● V6.5 MASTER</span>
+    </div>
+</header>
+
+<div class="workspace">
+    <!-- PANEL LEFT -->
+    <div class="panel-left">
+        <div class="input-group">
+            <label>Contexte / Région</label>
+            <input type="text" id="ctx" placeholder="Ex: Japon, Kyoto, Hiver">
+        </div>
+
+        <h3>LES 3 GARDIENS</h3>
+        <div class="input-group">
+            <label>Gardien 1 (Matière)</label>
+            <textarea id="g1" placeholder="Nom, Geste, Objet Totem..."></textarea>
+        </div>
+        <div class="input-group">
+            <label>Gardien 2 (Technique)</label>
+            <textarea id="g2"></textarea>
+        </div>
+        <div class="input-group">
+            <label>Gardien 3 (Lien)</label>
+            <textarea id="g3"></textarea>
+        </div>
+
+        <h3>CONVERGENCE</h3>
+        <div class="input-group">
+            <label>La Fête (+1)</label>
+            <textarea id="evt" placeholder="Détails du rituel final..."></textarea>
+        </div>
+
+        <button class="btn-gen" style="width:100%; padding:15px;" onclick="analyzeAngles()">1. ANALYSER LES ANGLES</button>
+    </div>
+
+    <!-- PANEL CENTER -->
+    <div class="panel-center">
+        <div class="toolbar">
+            <button class="tool-btn" onclick="document.execCommand('bold')">B</button>
+            <button class="tool-btn" onclick="document.execCommand('italic')">I</button>
+            <button class="btn-gen" onclick="saveProject()">💾 SAUVEGARDER V2</button>
+        </div>
+
+        <div id="paper" class="paper" contenteditable="true">
+            <br><br><br>
+            <h1 style="text-align:center;">TITRE DU FILM</h1>
+            <br>
+            <div style="text-align:center; color:#888; font-style:italic;">En attente de l'angle éditorial...</div>
+        </div>
+    </div>
+
+    <!-- PANEL RIGHT -->
+    <div class="panel-right">
+        <div class="chat-history" id="chatHist">
+            <div class="msg ai">Bienvenue dans DOC-OS. Commencez par remplir le formulaire ou importez un repérage pour analyser les angles.</div>
+        </div>
+        <div class="chat-input-zone">
+            <textarea id="chatInput" placeholder="Modifier une scène..."></textarea>
+            <div class="chat-btns">
+                <button class="btn-chat" onclick="refine()">MODIFIER</button>
+                <button class="btn-brain" onclick="saveToBrain()" title="Inscrire dans le prompt maître">🔐 MÉMOIRE</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TRIPTYQUE MODAL -->
+<div id="triptyqueModal" class="modal">
+    <div class="triptyque-container" id="angles-list">
+        <!-- Généré dynamiquement -->
+    </div>
+</div>
+
+<script>
+    function showLoader(txt) { document.getElementById('loader-text').innerText = txt; document.getElementById('loader').style.display = 'flex'; }
+    function hideLoader() { document.getElementById('loader').style.display = 'none'; }
+    function addChatMsg(role, txt) {
+        const div = document.createElement('div'); div.className = `msg ${role}`; div.innerText = txt;
+        document.getElementById('chatHist').appendChild(div);
+        document.getElementById('chatHist').scrollTop = document.getElementById('chatHist').scrollHeight;
+    }
+
+    // 1. ANALYSE DES ANGLES (SAS DE DÉCISION)
+    async function analyzeAngles() {
+        showLoader("Analyse dramaturgique...");
+        // Simulation d'appel API pour l'exemple
+        setTimeout(() => {
+            const mockAngles = [
+                { title: "Le Souffle du Silence", type: "HARMONIE", desc: "Angle de la symbiose. Focus sur l'adaptation aux cycles naturels. Ambiance contemplative, drone et ASMR." },
+                { title: "L'Urgence du Geste", type: "RUPTURE", desc: "Angle du déclin. Focus sur la fatigue des corps et la lutte contre l'oubli. Ambiance tendue, clair-obscur." },
+                { title: "La Trame Commune", type: "LIEN", desc: "Angle du social. Focus sur la transmission, la parole et l'identité collective. Brouhaha et portraits." }
+            ];
+            displayAngles(mockAngles);
+            hideLoader();
+        }, 1500);
+    }
+
+    function displayAngles(angles) {
+        const container = document.getElementById('angles-list');
+        container.innerHTML = "";
+        angles.forEach(a => {
+            container.innerHTML += `
+                <div class="angle-card" onclick="selectAngle('${a.type}')">
+                    <div class="type">${a.type}</div>
+                    <h2>${a.title}</h2>
+                    <p class="desc">${a.desc}</p>
+                    <button class="btn-select">CHOISIR CETTE VISION</button>
+                </div>
+            `;
+        });
+        document.getElementById('triptyqueModal').style.display = 'flex';
+    }
+
+    // 2. GÉNÉRATION FINALE BASÉE SUR L'ANGLE
+    async function selectAngle(angleType) {
+        document.getElementById('triptyqueModal').style.display = 'none';
+        showLoader(`Génération version ${angleType}...`);
+        
+        const fd = new FormData();
+        fd.append('angle', angleType);
+        fd.append('ctx', document.getElementById('ctx').value);
+        // ... ajout des autres champs ...
+
+        const res = await fetch('/api/generate_full', { method: 'POST', body: fd });
+        const data = await res.json();
+        
+        document.getElementById('paper').innerText = data.script;
+        addChatMsg('ai', `Version ${angleType} générée avec succès.`);
+        hideLoader();
+    }
+
+    // 3. CHATBOT & MÉMOIRE
+    async function refine() {
+        const instr = document.getElementById('chatInput').value;
+        if(!instr) return;
+        addChatMsg('user', instr);
+        showLoader("Le Co-pilote travaille...");
+        const res = await fetch('/api/refine', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ current_script: document.getElementById('paper').innerText, instruction: instr })
+        });
+        const data = await res.json();
+        document.getElementById('paper').innerText = data.script;
+        document.getElementById('chatInput').value = "";
+        hideLoader();
+    }
+
+    async function saveToBrain() {
+        const instr = document.getElementById('chatInput').value;
+        const res = await fetch('/api/memorize', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ rule: instr })
+        });
+        if(res.ok) addChatMsg('ai', "Règle enregistrée dans le prompt maître.");
+    }
+</script>
+
+</body>
+</html>
