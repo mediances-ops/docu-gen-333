@@ -8,12 +8,12 @@
     <style>
         :root {
             --primary: #2C3E50; --accent: #E67E22; --danger: #e50914; --bg: #f3f4f6;
-            --text: #2d3748; --dark-panel: #1a202c;
+            --text: #2d3748; --dark-panel: #1a202c; --handle-width: 30px;
         }
 
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* HEADER PRO */
+        /* HEADER HARMONISÉ */
         header { 
             background: linear-gradient(135deg, var(--primary) 0%, #34495e 100%); 
             padding: 10px 25px; border-bottom: 3px solid var(--accent); 
@@ -22,41 +22,50 @@
         .logo { font-weight: 800; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 1px; }
         .header-right { display: flex; align-items: center; gap: 15px; }
 
-        /* WORKSPACE */
         .workspace { display: flex; flex: 1; overflow: hidden; position: relative; }
 
-        /* PANEL GAUCHE : FORMULAIRE (Toujours visible) */
-        .panel-left { width: 320px; background: white; border-right: 1px solid #e2e8f0; padding: 20px; overflow-y: auto; z-index: 10; }
-        .input-group { margin-bottom: 15px; }
-        label { display: block; font-size: 0.65rem; color: #64748b; font-weight: 700; margin-bottom: 5px; text-transform: uppercase; }
-        input, textarea { width: 100%; background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 6px; box-sizing: border-box; font-size: 0.85rem; }
-        textarea { height: 60px; resize: none; }
-        h3 { font-size: 0.75rem; color: var(--primary); border-bottom: 1px solid #f1f5f9; padding-bottom: 5px; margin: 20px 0 10px 0; }
-
-        /* SIDEBAR HISTORIQUE COULISSANTE */
+        /* SIDEBAR HISTORIQUE COULISSANTE (À GAUCHE TOUTE) */
         .sidebar-history {
-            position: absolute; left: 320px; top: 0; bottom: 0; width: 280px;
+            position: absolute; left: 0; top: 0; bottom: 0; width: 300px;
             background: white; border-right: 2px solid var(--accent);
-            transform: translateX(-100%); transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 50; display: flex; box-shadow: 10px 0 30px rgba(0,0,0,0.1);
+            transform: translateX(-270px); /* Cache 270px, laisse 30px pour la poignée */
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 200; display: flex; box-shadow: 5px 0 15px rgba(0,0,0,0.1);
         }
         .sidebar-history.open { transform: translateX(0); }
-        .history-content { flex: 1; padding: 20px; overflow-y: auto; }
+        
+        .history-content { flex: 1; padding: 20px; overflow-y: auto; width: 270px; }
         .history-handle {
-            width: 30px; height: 100%; background: var(--accent);
+            width: var(--handle-width); height: 100%; background: var(--accent);
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; position: absolute; right: -30px;
+            cursor: pointer;
         }
         .handle-text { transform: rotate(-90deg); color: white; white-space: nowrap; font-size: 0.7rem; font-weight: 900; letter-spacing: 2px; }
 
-        /* PANEL CENTRAL : PAPIER AU MILIEU */
+        /* PANEL GAUCHE : FORMULAIRE (Décalé par la poignée) */
+        .panel-left { 
+            width: 320px; background: white; border-right: 1px solid #e2e8f0; 
+            padding: 20px; overflow-y: auto; z-index: 10;
+            margin-left: var(--handle-width); /* Decalage pour la poignée */
+        }
+        .input-group { margin-bottom: 12px; }
+        label { display: block; font-size: 0.65rem; color: #64748b; font-weight: 700; margin-bottom: 4px; text-transform: uppercase; }
+        input, textarea { width: 100%; background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 6px; box-sizing: border-box; font-size: 0.85rem; }
+        textarea { height: 55px; resize: none; }
+        h3 { font-size: 0.75rem; color: var(--primary); border-bottom: 1px solid #f1f5f9; padding-bottom: 5px; margin: 15px 0 10px 0; }
+
+        /* PANEL CENTRAL : PAPIER BIEN AU MILIEU */
         .panel-center { 
             flex: 1; background: #cbd5e0; padding: 40px; overflow-y: auto; 
             display: flex; flex-direction: column; align-items: center; 
         }
         
-        #project-header { width: 21cm; background: white; border-radius: 8px; padding: 12px; margin-bottom: 15px; display: none; border-left: 5px solid var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.1); align-items: center; justify-content: space-between; }
-        .vignette { width: 50px; height: 50px; border-radius: 4px; object-fit: cover; background: #eee; }
+        #project-header { 
+            width: 21cm; background: white; border-radius: 8px; padding: 12px; margin-bottom: 20px; 
+            display: none; border-left: 5px solid var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+            align-items: center; justify-content: space-between; 
+        }
+        .vignette { width: 60px; height: 60px; border-radius: 4px; object-fit: cover; background: #eee; border: 1px solid #ddd; }
 
         .editor-toolbar { position: sticky; top: 0; background: white; padding: 8px 20px; border-radius: 50px; border: 2px solid var(--primary); display: flex; gap: 15px; margin-bottom: 20px; z-index: 40; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .paper { background: white; color: black; width: 21cm; min-height: 29.7cm; padding: 2.5cm; font-family: 'Courier New', monospace; font-size: 11pt; box-shadow: 0 10px 40px rgba(0,0,0,0.2); white-space: pre-wrap; outline: none; }
@@ -68,7 +77,7 @@
         .msg.ai { background: #2d3748; border-left: 3px solid var(--accent); }
         .msg.user { background: var(--accent); text-align: right; }
 
-        /* STATUS BADGES */
+        /* BADGES */
         .status-badge { padding: 4px 12px; border-radius: 20px; background: rgba(255,255,255,0.15); font-size: 0.7rem; font-weight: bold; border: 1px solid rgba(255,255,255,0.3); }
         .active-dot { color: #2ecc71; margin-right: 5px; }
 
@@ -76,11 +85,9 @@
         .btn-gen { background: var(--danger); color: white; width: 100%; margin-top: 10px; }
         .btn-top { background: white; color: var(--primary); }
 
-        /* MODALS */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 5000; justify-content: center; align-items: center; }
-        .modal-box { background: white; padding: 25px; border-radius: 12px; width: 450px; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 5000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .modal-box { background: white; padding: 25px; border-radius: 12px; width: 450px; color: var(--text); }
         .angle-card { border: 2px solid #e2e8f0; padding: 15px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; }
-        .angle-card:hover { border-color: var(--accent); }
 
         #loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 62, 80, 0.95); z-index: 9999; flex-direction: column; justify-content: center; align-items: center; color: white; }
         .spinner { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 10px; }
@@ -89,7 +96,7 @@
 </head>
 <body>
 
-<div id="loader"><div class="spinner"></div><div id="loader-text">Traitement...</div></div>
+<div id="loader"><div class="spinner"></div><div id="loader-text">Studio en cours...</div></div>
 
 <header>
     <div class="logo"><i data-lucide="clapperboard"></i> Plateforme de scénarisation</div>
@@ -101,6 +108,17 @@
 </header>
 
 <div class="workspace">
+    <!-- SIDEBAR HISTORIQUE (POIGNÉE + CONTENU) -->
+    <div class="sidebar-history" id="historySidebar">
+        <div class="history-content">
+            <h4 style="font-size:0.8rem; border-bottom:2px solid var(--accent); padding-bottom:5px; color: var(--primary);">HISTORIQUE DU PROJET</h4>
+            <div id="v-list" style="margin-top:15px;"></div>
+        </div>
+        <div class="history-handle" onclick="toggleHistory()">
+            <div class="handle-text">HISTORIQUE</div>
+        </div>
+    </div>
+
     <!-- PANEL GAUCHE : FORMULAIRE -->
     <div class="panel-left">
         <div class="input-group"><label>🌍 CONTEXTE</label><input type="text" id="ctx"></div>
@@ -116,26 +134,15 @@
         <button class="btn btn-gen" onclick="analyzeAngles()"><i data-lucide="wand-2"></i> 1. ANALYSER LES ANGLES</button>
     </div>
 
-    <!-- SIDEBAR HISTORIQUE (COULISSANTE) -->
-    <div class="sidebar-history" id="historySidebar">
-        <div class="history-content">
-            <h4 style="font-size:0.8rem; border-bottom:2px solid var(--accent); padding-bottom:5px;">HISTORIQUE</h4>
-            <div id="v-list"></div>
-        </div>
-        <div class="history-handle" onclick="toggleHistory()">
-            <div class="handle-text">HISTORIQUE</div>
-        </div>
-    </div>
-
-    <!-- PANEL CENTRAL : PAPIER AU CENTRE -->
+    <!-- PANEL CENTRAL : PAPIER CENTRE -->
     <div class="panel-center">
         <div id="project-header">
             <div style="display:flex; align-items:center; gap:15px;">
                 <img id="display-vignette" class="vignette" src="">
                 <div>
-                    <div id="display-region" style="font-size:0.6rem; color:var(--accent); font-weight:bold; letter-spacing:1px;">REGION</div>
+                    <div id="display-region" style="font-size:0.6rem; color:var(--accent); font-weight:800; letter-spacing:1px; text-transform:uppercase;">REGION</div>
                     <h2 id="display-title" style="margin:0; font-size:1.1rem; font-weight:900;">Titre du projet</h2>
-                    <div style="font-size:0.75rem; color:#64748b;">Fixer : <span id="display-fixer" style="font-weight:bold;">...</span></div>
+                    <div style="font-size:0.75rem; color:#64748b;">Correspondant : <span id="display-fixer" style="font-weight:bold;">...</span></div>
                 </div>
             </div>
             <div style="text-align:right">
@@ -156,10 +163,10 @@
 
     <!-- PANEL DROIT : CHATBOT -->
     <div class="panel-right">
-        <div class="chat-history" id="chatHist"><div class="msg ai">Studio prêt. Chargez un import terrain pour commencer.</div></div>
+        <div class="chat-history" id="chatHist"><div class="msg ai">Studio prêt. Chargez un dossier terrain.</div></div>
         <div style="padding:15px; background:#111;">
-            <textarea id="chatInput" placeholder="Consigne IA..."></textarea>
-            <button class="btn btn-gen" style="background:var(--accent); margin-top:10px;" onclick="refine()">MODIFIER</button>
+            <textarea id="chatInput" placeholder="Modifier une scène..."></textarea>
+            <button class="btn btn-gen" style="background:var(--accent); margin-top:10px;" onclick="refine()">MODIFIER LE SCRIPT</button>
         </div>
     </div>
 </div>
@@ -167,9 +174,9 @@
 <!-- MODALS -->
 <div id="importModal" class="modal">
     <div class="modal-box">
-        <h3 style="margin-top:0">Imports Bridge</h3>
+        <h3 style="margin-top:0">Dossiers Importés (Bridge)</h3>
         <div id="import-list"></div>
-        <button class="btn" style="background:#eee; margin-top:10px; width:100%;" onclick="document.getElementById('importModal').style.display='none'">FERMER</button>
+        <button class="btn" style="background:#eee; margin-top:15px; width:100%; color:var(--primary);" onclick="document.getElementById('importModal').style.display='none'">FERMER</button>
     </div>
 </div>
 
@@ -186,9 +193,10 @@
         const res = await fetch('/api/projects');
         const projects = await res.json();
         const list = document.getElementById('import-list');
-        list.innerHTML = projects.map(p => `
+        list.innerHTML = projects.length === 0 ? "<p>Aucun import détecté.</p>" : projects.map(p => `
             <div class="angle-card" onclick="loadProject(${p.id})">
-                <b>${p.title}</b><br><small>${p.region} - ${p.date}</small>
+                <div style="float:right; font-size:0.6rem; color:var(--accent); font-weight:bold;">${p.date}</div>
+                <b>${p.title}</b><br><small>Région : ${p.region}</small>
             </div>
         `).join('');
     }
@@ -203,14 +211,13 @@
             const data = await resDetails.json();
             const raw = data.form_data;
 
-            // Header Studio
             document.getElementById('project-header').style.display='flex';
-            document.getElementById('display-region').innerText = raw.region;
+            document.getElementById('display-region').innerText = raw.region || "Inconnu";
+            document.getElementById('display-title').innerText = `SCÉNARIO : ${raw.region}`;
             document.getElementById('display-fixer').innerText = (raw.fixer_prenom || '') + ' ' + (raw.fixer_nom || '');
             document.getElementById('display-vignette').src = raw.image_region || '';
-            document.getElementById('display-date').innerText = 'Reçu le ' + data.date;
+            document.getElementById('display-date').innerText = 'Importé le ' + data.date;
             
-            // Formulaire
             document.getElementById('ctx').value = (raw.pays || '') + ', ' + (raw.region || '');
             if(raw.gardiens) {
                 raw.gardiens.forEach((g, i) => {
@@ -219,12 +226,11 @@
             }
             document.getElementById('evt').value = raw.episode_data?.fete || "";
 
-            // Versions
             const resV = await fetch(`/api/projects/${id}/versions`);
             const versions = await resV.json();
             renderVersions(versions);
 
-            addChatMsg('ai', `Dossier ${raw.region} chargé.`);
+            addChatMsg('ai', `Projet ${raw.region} chargé.`);
             lucide.createIcons();
         } catch(e) { console.error(e); }
         hideLoader();
@@ -232,18 +238,20 @@
 
     function renderVersions(versions) {
         const list = document.getElementById('v-list');
-        list.innerHTML = versions.map(v => `
-            <div class="v-item" onclick="loadVersion(${v.id})">
-                <div style="display:flex; justify-content:space-between;"><b>V${v.number}</b> <span style="font-size:0.6rem; opacity:0.6;">${v.status}</span></div>
-                <div style="font-size:0.6rem;">${v.date}</div>
+        list.innerHTML = versions.length === 0 ? "<p style='font-size:0.7rem; color:#999;'>Aucune version.</p>" : versions.map(v => `
+            <div class="v-item" onclick="loadVersion(${v.id})" style="border-left:3px solid var(--accent);">
+                <div style="display:flex; justify-content:space-between;"><b>V${v.number}</b> <span style="font-size:0.5rem; background:#eee; padding:2px 5px; border-radius:4px;">${v.status}</span></div>
+                <div style="font-size:0.6rem; margin-top:3px; opacity:0.7;">${v.date}</div>
+                <div style="font-size:0.6rem; font-style:italic; margin-top:3px; overflow:hidden; text-overflow:ellipsis;">"${v.note || ''}"</div>
             </div>
         `).join('');
         if(versions.length > 0) document.getElementById('display-version-tag').innerText = "VERSION : V" + versions[0].number;
+        else document.getElementById('display-version-tag').innerText = "VERSION : EN COURS";
     }
 
     async function analyzeAngles() {
         if(!document.getElementById('ctx').value) return alert("Chargez un dossier.");
-        showLoader("IA : Analyse des trajectoires...");
+        showLoader("Analyse des angles...");
         const fd = new FormData();
         fd.append('ctx', document.getElementById('ctx').value);
         fd.append('g1', document.getElementById('g1').value);
@@ -251,14 +259,19 @@
         fd.append('g3', document.getElementById('g3').value);
         fd.append('evt', document.getElementById('evt').value);
 
-        const res = await fetch('/api/analyze_angles', { method:'POST', body:fd });
-        const angles = await res.json();
-        document.getElementById('angles-container').innerHTML = angles.map(a => `
-            <div class="modal-box angle-card" style="width:250px" onclick="selectAngle('${a.type}', '${a.title.replace(/'/g, "\\'")}')">
-                <small>${a.type}</small><h3>${a.title}</h3><p style="font-size:0.7rem">${a.desc}</p>
-            </div>
-        `).join('');
-        document.getElementById('triptyqueModal').style.display='flex';
+        try {
+            const res = await fetch('/api/analyze_angles', { method:'POST', body:fd });
+            const angles = await res.json();
+            document.getElementById('angles-container').innerHTML = angles.map(a => `
+                <div class="modal-box angle-card" style="width:280px" onclick="selectAngle('${a.type}', '${a.title.replace(/'/g, "\\'")}')">
+                    <div style="color:var(--accent); font-weight:bold; font-size:0.6rem;">VISION ${a.type}</div>
+                    <h2 style="font-size:1.1rem; margin:8px 0;">${a.title}</h2>
+                    <p style="font-size:0.75rem; color:#64748b; line-height:1.4;">${a.desc}</p>
+                    <button class="btn btn-gen" style="font-size:0.7rem; background:var(--primary); margin-top:10px;">SÉLECTIONNER</button>
+                </div>
+            `).join('');
+            document.getElementById('triptyqueModal').style.display='flex';
+        } catch(e) { alert("Erreur IA"); }
         hideLoader();
     }
 
@@ -266,7 +279,7 @@
         document.getElementById('triptyqueModal').style.display='none';
         document.getElementById('display-angle').innerText = 'ANGLE : ' + type;
         document.getElementById('display-title').innerText = title;
-        showLoader("IA : Rédaction...");
+        showLoader(`Rédaction (${type})...`);
         
         const fd = new FormData();
         fd.append('ctx', document.getElementById('ctx').value);
@@ -286,6 +299,7 @@
         const i = document.getElementById('chatInput').value;
         if(!i) return;
         addChatMsg('user', i);
+        document.getElementById('chatInput').value = "";
         showLoader("Modification...");
         const res = await fetch('/api/refine', {
             method:'POST', headers:{'Content-Type':'application/json'},
@@ -293,7 +307,6 @@
         });
         const data = await res.json();
         document.getElementById('paper').innerText = data.script.replace(/\*\*/g, '');
-        document.getElementById('chatInput').value = "";
         hideLoader();
     }
 
