@@ -54,15 +54,21 @@ async def list_projects(db: Session = Depends(get_db)):
 @app.get("/api/projects/{project_id}")
 async def get_project_details(project_id: int, db: Session = Depends(get_db)):
     """Récupère les données complètes (vignette, fixer, formulaire)"""
-    project = db.query(models.Project).get(project_id)
+    # On utilise .filter().first() qui est plus stable que .get()
+    project = db.query(models.Project).filter(models.Project.id == project_id).first()
     if not project:
         raise HTTPException(status_code=404, detail="Projet non trouvé")
     
-    # On renvoie le JSON de Local Scouting et la date formatée
-    return {
-        "form_data": json.loads(project.form_data),
-        "date": project.created_at.strftime("%d/%m/%Y")
-    }
+    try:
+        # On décode le JSON stocké dans form_data
+        form_data = json.loads(project.form_data) if project.form_data else {}
+        return {
+            "form_data": form_data,
+            "date": project.created_at.strftime("%d/%m/%Y")
+        }
+    except Exception as e:
+        print(f"Erreur décodage JSON projet {project_id}: {e}")
+        return {"form_data": {}, "date": project.created_at.strftime("%d/%m/%Y")}
 
 @app.get("/api/projects/{project_id}/versions")
 async def list_versions(project_id: int, db: Session = Depends(get_db)):
