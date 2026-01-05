@@ -120,13 +120,12 @@ async def import_from_scouting(request: Request, db: Session = Depends(get_db)):
 async def analyze_angles(ctx: str = Form(...), g1: str = Form(...), g2: str = Form(...), g3: str = Form(...), evt: str = Form(...)):
     """L'IA analyse le terrain et propose les 3 visions artistiques"""
     prompt = f"""
-    AGIS COMME UN DIRECTEUR ARTISTIQUE DE DOCUMENTAIRE.
-    Données terrain : Région {ctx}.
-    Gardiens identifiés : {g1}, {g2}, {g3}.
-    Célébration finale : {evt}.
-
-    Propose 3 angles éditoriaux (trajectoires narratives) différents pour ce film.
-    RÉPONDS EXCLUSIVEMENT EN JSON STRICT AU FORMAT SUIVANT :
+    Données : Région {ctx}, Gardiens: {g1}, {g2}, {g3}, Convergence: {evt}.
+    
+    AGIS COMME UN DIRECTEUR ARTISTIQUE. Propose 3 angles éditoriaux de 52 min.
+    REPONDS EXCLUSIVEMENT PAR UN TABLEAU JSON SANS AUCUN TEXTE AVANT OU APRÈS.
+    
+    FORMAT ATTENDU :
     [
       {{"type": "HARMONIE", "title": "...", "desc": "..."}},
       {{"type": "RUPTURE", "title": "...", "desc": "..."}},
@@ -135,11 +134,19 @@ async def analyze_angles(ctx: str = Form(...), g1: str = Form(...), g2: str = Fo
     """
     try:
         response = model_ia.generate_content(prompt)
-        # Nettoyage pour extraire le JSON
-        json_clean = response.text.replace('```json', '').replace('```', '').strip()
-        return JSONResponse(content=json.loads(json_clean))
+        text_res = response.text.strip()
+        
+        # Nettoyage chirurgical des balises markdown si présentes
+        if "```json" in text_res:
+            text_res = text_res.split("```json")[1].split("```")[0].strip()
+        elif "```" in text_res:
+            text_res = text_res.split("```")[1].split("```")[0].strip()
+            
+        return JSONResponse(content=json.loads(text_res))
     except Exception as e:
-        return JSONResponse(status_code=500, content=[{"type":"ERR","title":"Erreur IA","desc":"Vérifiez vos données."}])
+        print(f"ERREUR IA : {str(e)}") # Visible dans tes logs Railway
+        # En cas d'échec, on renvoie un message clair au lieu de planter
+        return JSONResponse(status_code=500, content=[{"type":"ERREUR","title":"IA indisponible","desc": f"Détail : {str(e)[:50]}..."}])
 
 @app.post("/api/generate_full")
 async def generate_full(ctx: str = Form(...), g1: str = Form(...), g2: str = Form(...), g3: str = Form(...), evt: str = Form(...), angle: str = Form(...)):
