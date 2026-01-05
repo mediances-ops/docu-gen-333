@@ -155,21 +155,64 @@
     </div>
 
     <!-- CENTRE : SCÉNARIO -->
-    <div class="panel-center">
-        <div class="editor-toolbar">
-            <button class="tool-btn" style="color:var(--primary)" onclick="document.execCommand('bold')">GRAS</button>
-            <button class="tool-btn" style="color:var(--primary)" onclick="document.execCommand('italic')">ITALIQUE</button>
-            <div style="width:1px; background:#e2e8f0;"></div>
-            <button class="tool-btn" style="color:var(--accent)" onclick="alert('Sauvegarde V2 en cours...')">💾 SAUVEGARDER</button>
+   <!-- PANEL CENTRAL : L'ÉDITEUR AVEC HISTORIQUE -->
+<div class="panel-center" style="display: flex; flex-direction: column; align-items: center;">
+    
+    <!-- BANDEAU D'IDENTIFICATION STUDIO (DYNAMIQUE) -->
+    <div id="project-header" style="width: 21cm; margin-bottom: 25px; display: none; background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-left: 6px solid var(--accent); align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <!-- Vignette Région -->
+            <img id="display-vignette" src="" style="width: 80px; height: 80px; border-radius: 8px; object-fit: cover; background: #ddd; border: 2px solid #eee;">
+            <div>
+                <div id="display-region" style="font-size: 0.7rem; color: var(--accent); font-weight: 800; text-transform: uppercase; letter-spacing: 2px;">RÉGION</div>
+                <h2 id="display-title" style="margin: 2px 0; color: var(--primary); font-size: 1.4rem; font-weight: 800;">Titre du Scénario</h2>
+                <div style="font-size: 0.85rem; color: #64748b;">
+                    <i data-lucide="user" style="width:14px; vertical-align:middle;"></i> 
+                    Correspondant : <span id="display-fixer" style="font-weight: 600; color: var(--primary);">...</span>
+                </div>
+            </div>
         </div>
-
-        <div id="paper" class="paper" contenteditable="true">
-            <br><br><br>
-            <h1 style="text-align:center; text-transform: uppercase;">TITRE DU DOCUMENTAIRE</h1>
-            <br>
-            <div style="text-align:center; color:#a0aec0; font-style:italic;">En attente de la sélection d'un angle éditorial...</div>
+        <div style="text-align: right;">
+            <div id="display-version-tag" style="font-size: 0.7rem; background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-weight: 800;">VERSION : EN COURS</div>
+            <div id="display-angle" style="font-size: 0.8rem; color: var(--accent); font-weight: 700; margin-top: 8px; text-transform: uppercase;">Angle : Non défini</div>
+            <div id="display-date" style="font-size: 0.65rem; color: #a0aec0; margin-top: 5px;">Importé le --/--/----</div>
         </div>
     </div>
+
+    <!-- ZONE DE TRAVAIL : HISTORIQUE + PAPIER -->
+    <div style="display: flex; gap: 30px; align-items: flex-start; width: 100%; justify-content: center;">
+        
+        <!-- COLONNE HISTORIQUE (TIME MACHINE) -->
+        <div id="version-timeline" style="width: 180px; position: sticky; top: 10px; display: none;">
+            <h4 style="font-size: 0.7rem; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; border-bottom: 1px solid #cbd5e0; padding-bottom: 5px;">
+                <i data-lucide="history" style="width:12px;"></i> Historique
+            </h4>
+            <div id="version-list" style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- Les versions V1, V2 s'afficheront ici -->
+            </div>
+            
+            <!-- PRÉPARATION BUDGET (CACHE POUR L'INSTANT) -->
+            <div id="budget-preview" style="margin-top: 30px; padding: 10px; background: #edf2f7; border-radius: 8px; border: 1px dashed #cbd5e0; opacity: 0.6;">
+                <div style="font-size: 0.6rem; font-weight: bold; color: #4a5568;">ESTIMATION BUDGET</div>
+                <div style="font-size: 1rem; color: var(--primary); font-weight: 800;">-- €</div>
+            </div>
+        </div>
+
+        <!-- BLOC ÉDITEUR -->
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <div class="editor-toolbar">
+                <button class="tool-btn" onclick="document.execCommand('bold')">B</button>
+                <button class="tool-btn" onclick="document.execCommand('italic')">I</button>
+                <div style="width:1px; background:#e2e8f0; height: 20px;"></div>
+                <button class="tool-btn" style="color:var(--accent)" onclick="saveNewVersion()">💾 SAUVEGARDER V2</button>
+            </div>
+
+            <div id="paper" class="paper" contenteditable="true">
+                <!-- Texte IA -->
+            </div>
+        </div>
+    </div>
+</div>
 
     <!-- DROITE : CHATBOT -->
     <div class="panel-right">
