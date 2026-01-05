@@ -2,146 +2,309 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>DOCU-GEN 333+1 | Studio de Production</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plateforme de scénarisation | DOC-OS</title>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        :root { --primary: #2C3E50; --accent: #E67E22; --danger: #e50914; --bg: #f3f4f6; --text: #2d3748; }
+        :root {
+            --primary: #2C3E50; --accent: #E67E22; --danger: #e50914; --bg: #f3f4f6;
+            --text: #2d3748; --dark-panel: #1a202c;
+        }
+
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        
-        header { background: linear-gradient(135deg, var(--primary) 0%, #34495e 100%); padding: 12px 25px; border-bottom: 3px solid var(--accent); display: flex; justify-content: space-between; align-items: center; color: white; }
-        
-        .workspace { display: flex; flex: 1; overflow: hidden; }
 
-        /* SIDEBAR VERSIONS (GAUCHE) */
-        .sidebar-versions { width: 280px; background: #fff; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; }
-        .v-card { padding: 15px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: 0.2s; }
-        .v-card:hover { background: #f8fafc; }
-        .v-card.active { border-left: 4px solid var(--accent); background: #fffaf0; }
-        .badge { font-size: 0.6rem; padding: 2px 8px; border-radius: 10px; font-weight: bold; text-transform: uppercase; }
-        .status-non-vu { background: #e2e8f0; color: #4a5568; }
-        .status-en-cours { background: #fff3cd; color: #856404; }
-        .status-valide { background: #d4edda; color: #155724; }
+        /* HEADER PRO */
+        header { 
+            background: linear-gradient(135deg, var(--primary) 0%, #34495e 100%); 
+            padding: 10px 25px; border-bottom: 3px solid var(--accent); 
+            display: flex; justify-content: space-between; align-items: center; color: white; z-index: 1000;
+        }
+        .logo { font-weight: 800; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .header-right { display: flex; align-items: center; gap: 15px; }
 
-        /* FORM PANEL */
-        .panel-left { width: 320px; background: white; border-right: 1px solid #e2e8f0; padding: 20px; overflow-y: auto; }
+        /* WORKSPACE */
+        .workspace { display: flex; flex: 1; overflow: hidden; position: relative; }
+
+        /* PANEL GAUCHE : FORMULAIRE (Toujours visible) */
+        .panel-left { width: 320px; background: white; border-right: 1px solid #e2e8f0; padding: 20px; overflow-y: auto; z-index: 10; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-size: 0.65rem; color: #64748b; font-weight: 700; margin-bottom: 5px; text-transform: uppercase; }
+        input, textarea { width: 100%; background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 6px; box-sizing: border-box; font-size: 0.85rem; }
+        textarea { height: 60px; resize: none; }
+        h3 { font-size: 0.75rem; color: var(--primary); border-bottom: 1px solid #f1f5f9; padding-bottom: 5px; margin: 20px 0 10px 0; }
+
+        /* SIDEBAR HISTORIQUE COULISSANTE */
+        .sidebar-history {
+            position: absolute; left: 320px; top: 0; bottom: 0; width: 280px;
+            background: white; border-right: 2px solid var(--accent);
+            transform: translateX(-100%); transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 50; display: flex; box-shadow: 10px 0 30px rgba(0,0,0,0.1);
+        }
+        .sidebar-history.open { transform: translateX(0); }
+        .history-content { flex: 1; padding: 20px; overflow-y: auto; }
+        .history-handle {
+            width: 30px; height: 100%; background: var(--accent);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; position: absolute; right: -30px;
+        }
+        .handle-text { transform: rotate(-90deg); color: white; white-space: nowrap; font-size: 0.7rem; font-weight: 900; letter-spacing: 2px; }
+
+        /* PANEL CENTRAL : PAPIER AU MILIEU */
+        .panel-center { 
+            flex: 1; background: #cbd5e0; padding: 40px; overflow-y: auto; 
+            display: flex; flex-direction: column; align-items: center; 
+        }
         
-        /* EDITOR PANEL */
-        .panel-center { flex: 1; background: #cbd5e0; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
-        .paper { background: white; width: 21cm; min-height: 29.7cm; padding: 2.5cm; font-family: 'Courier New', monospace; box-shadow: 0 10px 30px rgba(0,0,0,0.2); outline: none; }
-        
-        /* CHAT PANEL */
-        .panel-right { width: 300px; background: #1a202c; color: white; display: flex; flex-direction: column; }
-        
-        .btn-action { background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        #project-header { width: 21cm; background: white; border-radius: 8px; padding: 12px; margin-bottom: 15px; display: none; border-left: 5px solid var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.1); align-items: center; justify-content: space-between; }
+        .vignette { width: 50px; height: 50px; border-radius: 4px; object-fit: cover; background: #eee; }
+
+        .editor-toolbar { position: sticky; top: 0; background: white; padding: 8px 20px; border-radius: 50px; border: 2px solid var(--primary); display: flex; gap: 15px; margin-bottom: 20px; z-index: 40; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .paper { background: white; color: black; width: 21cm; min-height: 29.7cm; padding: 2.5cm; font-family: 'Courier New', monospace; font-size: 11pt; box-shadow: 0 10px 40px rgba(0,0,0,0.2); white-space: pre-wrap; outline: none; }
+
+        /* PANEL DROIT : CHATBOT */
+        .panel-right { width: 300px; background: var(--dark-panel); color: white; display: flex; flex-direction: column; }
+        .chat-history { flex: 1; padding: 15px; overflow-y: auto; font-size: 0.8rem; }
+        .msg { padding: 10px; border-radius: 8px; margin-bottom: 10px; line-height: 1.4; }
+        .msg.ai { background: #2d3748; border-left: 3px solid var(--accent); }
+        .msg.user { background: var(--accent); text-align: right; }
+
+        /* STATUS BADGES */
+        .status-badge { padding: 4px 12px; border-radius: 20px; background: rgba(255,255,255,0.15); font-size: 0.7rem; font-weight: bold; border: 1px solid rgba(255,255,255,0.3); }
+        .active-dot { color: #2ecc71; margin-right: 5px; }
+
+        .btn { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; display: flex; align-items: center; gap: 8px; font-size: 0.8rem; }
+        .btn-gen { background: var(--danger); color: white; width: 100%; margin-top: 10px; }
+        .btn-top { background: white; color: var(--primary); }
+
+        /* MODALS */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 5000; justify-content: center; align-items: center; }
+        .modal-box { background: white; padding: 25px; border-radius: 12px; width: 450px; }
+        .angle-card { border: 2px solid #e2e8f0; padding: 15px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; }
+        .angle-card:hover { border-color: var(--accent); }
+
+        #loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 62, 80, 0.95); z-index: 9999; flex-direction: column; justify-content: center; align-items: center; color: white; }
+        .spinner { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 10px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
+<div id="loader"><div class="spinner"></div><div id="loader-text">Traitement...</div></div>
+
 <header>
-    <div style="font-weight:900;"><i data-lucide="clapperboard"></i> DOCU-GEN 333+1</div>
-    <div id="project-info" style="font-size: 0.8rem; font-weight: bold;">AUCUN PROJET CHARGÉ</div>
+    <div class="logo"><i data-lucide="clapperboard"></i> Plateforme de scénarisation</div>
+    <div class="header-right">
+        <button class="btn btn-top" onclick="openImportModal()"><i data-lucide="download-cloud"></i> CHANGER UN IMPORT</button>
+        <div class="status-badge"><span class="active-dot">●</span> BRIDGE CONNECTÉ</div>
+        <div id="display-version-tag" class="status-badge">VERSION : --</div>
+    </div>
 </header>
 
 <div class="workspace">
-    <!-- 1. SIDEBAR VERSIONS -->
-    <div class="sidebar-versions" id="sidebar-versions">
-        <div style="padding: 15px; background: var(--primary); color: white; font-size: 0.8rem; font-weight: bold;">HISTORIQUE DES VERSIONS</div>
-        <div id="version-list" style="flex:1; overflow-y:auto;">
-            <div style="padding:20px; text-align:center; color:#999;">Chargez un import...</div>
-        </div>
-    </div>
-
-    <!-- 2. FORMULAIRE -->
+    <!-- PANEL GAUCHE : FORMULAIRE -->
     <div class="panel-left">
-        <button class="btn-action" style="width:100%; margin-bottom:20px; background:var(--primary);" onclick="openImportModal()">📂 CHARGER UN IMPORT</button>
-        <div id="form-fields">
-            <label>CONTEXTE</label><input type="text" id="ctx" style="width:100%; margin-bottom:10px;">
-            <label>G1</label><textarea id="g1" style="width:100%; height:60px;"></textarea>
-            <label>G2</label><textarea id="g2" style="width:100%; height:60px;"></textarea>
-            <label>G3</label><textarea id="g3" style="width:100%; height:60px;"></textarea>
-            <button class="btn-action" style="width:100%; background:var(--danger); margin-top:10px;" onclick="analyzeAngles()">ANALYSER LES ANGLES</button>
+        <div class="input-group"><label>🌍 CONTEXTE</label><input type="text" id="ctx"></div>
+        
+        <h3><i data-lucide="users" style="width:12px;"></i> LES 3 GARDIENS</h3>
+        <div class="input-group"><label>G1 (MATIÈRE)</label><textarea id="g1"></textarea></div>
+        <div class="input-group"><label>G2 (TECHNIQUE)</label><textarea id="g2"></textarea></div>
+        <div class="input-group"><label>G3 (LIEN)</label><textarea id="g3"></textarea></div>
+        
+        <h3><i data-lucide="sparkles" style="width:12px;"></i> CONVERGENCE</h3>
+        <div class="input-group"><label>La Fête / Rituel (+1)</label><textarea id="evt"></textarea></div>
+        
+        <button class="btn btn-gen" onclick="analyzeAngles()"><i data-lucide="wand-2"></i> 1. ANALYSER LES ANGLES</button>
+    </div>
+
+    <!-- SIDEBAR HISTORIQUE (COULISSANTE) -->
+    <div class="sidebar-history" id="historySidebar">
+        <div class="history-content">
+            <h4 style="font-size:0.8rem; border-bottom:2px solid var(--accent); padding-bottom:5px;">HISTORIQUE</h4>
+            <div id="v-list"></div>
+        </div>
+        <div class="history-handle" onclick="toggleHistory()">
+            <div class="handle-text">HISTORIQUE</div>
         </div>
     </div>
 
-    <!-- 3. ÉDITEUR -->
+    <!-- PANEL CENTRAL : PAPIER AU CENTRE -->
     <div class="panel-center">
-        <div id="studio-header" style="width: 21cm; display:none; margin-bottom:15px; align-items:center; gap:15px; background:white; padding:10px; border-radius:8px;">
-            <img id="vignette" src="" style="width:50px; height:50px; border-radius:4px; object-fit:cover;">
-            <div id="meta-text" style="font-size:0.9rem; font-weight:bold;"></div>
+        <div id="project-header">
+            <div style="display:flex; align-items:center; gap:15px;">
+                <img id="display-vignette" class="vignette" src="">
+                <div>
+                    <div id="display-region" style="font-size:0.6rem; color:var(--accent); font-weight:bold; letter-spacing:1px;">REGION</div>
+                    <h2 id="display-title" style="margin:0; font-size:1.1rem; font-weight:900;">Titre du projet</h2>
+                    <div style="font-size:0.75rem; color:#64748b;">Fixer : <span id="display-fixer" style="font-weight:bold;">...</span></div>
+                </div>
+            </div>
+            <div style="text-align:right">
+                <div id="display-angle" style="font-size:0.7rem; font-weight:bold; color:var(--accent)">ANGLE : --</div>
+                <div id="display-date" style="font-size:0.6rem; color:#999">Importé le --</div>
+            </div>
         </div>
-        <div class="paper" id="paper" contenteditable="true"></div>
-        <div style="margin-top:20px;">
-            <input type="text" id="version-note" placeholder="Note pour cette version (ex: Angle Rupture)" style="width:300px; padding:10px;">
-            <button class="btn-action" onclick="saveVersion()">💾 SAUVEGARDER V...</button>
+
+        <div class="editor-toolbar">
+            <button onclick="document.execCommand('bold')">B</button>
+            <button onclick="document.execCommand('italic')">I</button>
+            <div style="width:1px; background:#e2e8f0; height:15px;"></div>
+            <button style="color:var(--accent); font-weight:bold; border:none; background:none; cursor:pointer;" onclick="saveVersion()">💾 SAUVEGARDER V2</button>
         </div>
+
+        <div id="paper" class="paper" contenteditable="true"></div>
     </div>
 
-    <!-- 4. CHATBOT -->
+    <!-- PANEL DROIT : CHATBOT -->
     <div class="panel-right">
-        <div class="chat-history" id="chatHist"></div>
+        <div class="chat-history" id="chatHist"><div class="msg ai">Studio prêt. Chargez un import terrain pour commencer.</div></div>
         <div style="padding:15px; background:#111;">
-            <textarea id="chatInput" style="width:100%; background:#333; color:white; border:none; padding:10px; border-radius:5px;" placeholder="Instructions..."></textarea>
-            <button class="btn-action" style="width:100%; margin-top:10px;" onclick="refine()">MODIFIER</button>
+            <textarea id="chatInput" placeholder="Consigne IA..."></textarea>
+            <button class="btn btn-gen" style="background:var(--accent); margin-top:10px;" onclick="refine()">MODIFIER</button>
         </div>
     </div>
 </div>
 
 <!-- MODALS -->
-<div id="importModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center;">
-    <div style="background:white; padding:30px; border-radius:15px; width:400px;" id="import-list"></div>
+<div id="importModal" class="modal">
+    <div class="modal-box">
+        <h3 style="margin-top:0">Imports Bridge</h3>
+        <div id="import-list"></div>
+        <button class="btn" style="background:#eee; margin-top:10px; width:100%;" onclick="document.getElementById('importModal').style.display='none'">FERMER</button>
+    </div>
 </div>
+
+<div id="triptyqueModal" class="modal"><div style="display:flex; gap:15px;" id="angles-container"></div></div>
 
 <script>
     lucide.createIcons();
     let currentProjectId = null;
 
+    function toggleHistory() { document.getElementById('historySidebar').classList.toggle('open'); }
+
     async function openImportModal() {
+        document.getElementById('importModal').style.display='flex';
         const res = await fetch('/api/projects');
         const projects = await res.json();
         const list = document.getElementById('import-list');
-        list.innerHTML = '<h3>Dossiers Importés</h3>' + projects.map(p => `
-            <div onclick="loadProject(${p.id})" style="padding:10px; border-bottom:1px solid #eee; cursor:pointer;">
-                <b>${p.title}</b><br><small>${p.region}</small>
+        list.innerHTML = projects.map(p => `
+            <div class="angle-card" onclick="loadProject(${p.id})">
+                <b>${p.title}</b><br><small>${p.region} - ${p.date}</small>
             </div>
-        `).join('') + '<button onclick="document.getElementById(\'importModal\').style.display=\'none\'" style="margin-top:20px;">Fermer</button>';
-        document.getElementById('importModal').style.display = 'flex';
+        `).join('');
     }
 
     async function loadProject(id) {
         currentProjectId = id;
         document.getElementById('importModal').style.display = 'none';
-        const res = await fetch(`/api/projects/${id}/versions`);
-        const versions = await res.json();
-        renderVersions(versions);
-        // ... (Logique de remplissage formulaire existante)
+        showLoader("Chargement du projet...");
+        
+        try {
+            const resDetails = await fetch(`/api/projects/${id}`);
+            const data = await resDetails.json();
+            const raw = data.form_data;
+
+            // Header Studio
+            document.getElementById('project-header').style.display='flex';
+            document.getElementById('display-region').innerText = raw.region;
+            document.getElementById('display-fixer').innerText = (raw.fixer_prenom || '') + ' ' + (raw.fixer_nom || '');
+            document.getElementById('display-vignette').src = raw.image_region || '';
+            document.getElementById('display-date').innerText = 'Reçu le ' + data.date;
+            
+            // Formulaire
+            document.getElementById('ctx').value = (raw.pays || '') + ', ' + (raw.region || '');
+            if(raw.gardiens) {
+                raw.gardiens.forEach((g, i) => {
+                    if(i<3) document.getElementById('g'+(i+1)).value = `NOM: ${g.nom}\nMETIER: ${g.fonction}\nSAVOIR: ${g.savoir_transmis || ''}`;
+                });
+            }
+            document.getElementById('evt').value = raw.episode_data?.fete || "";
+
+            // Versions
+            const resV = await fetch(`/api/projects/${id}/versions`);
+            const versions = await resV.json();
+            renderVersions(versions);
+
+            addChatMsg('ai', `Dossier ${raw.region} chargé.`);
+            lucide.createIcons();
+        } catch(e) { console.error(e); }
+        hideLoader();
     }
 
     function renderVersions(versions) {
-        const list = document.getElementById('version-list');
+        const list = document.getElementById('v-list');
         list.innerHTML = versions.map(v => `
-            <div class="v-card" onclick="loadVersion(${v.id})">
-                <div style="display:flex; justify-content:space-between;">
-                    <b>Version ${v.number}</b>
-                    <span class="badge status-${v.status.toLowerCase().replace(' ', '-')}">${v.status}</span>
-                </div>
-                <div style="font-size:0.7rem; color:#888;">${v.date}</div>
-                <div style="font-size:0.75rem; font-style:italic;">"${v.note || ''}"</div>
-                <button onclick="forkVersion(${v.id})" style="font-size:0.6rem; margin-top:5px;">DUPLIQUER</button>
+            <div class="v-item" onclick="loadVersion(${v.id})">
+                <div style="display:flex; justify-content:space-between;"><b>V${v.number}</b> <span style="font-size:0.6rem; opacity:0.6;">${v.status}</span></div>
+                <div style="font-size:0.6rem;">${v.date}</div>
             </div>
         `).join('');
+        if(versions.length > 0) document.getElementById('display-version-tag').innerText = "VERSION : V" + versions[0].number;
+    }
+
+    async function analyzeAngles() {
+        if(!document.getElementById('ctx').value) return alert("Chargez un dossier.");
+        showLoader("IA : Analyse des trajectoires...");
+        const fd = new FormData();
+        fd.append('ctx', document.getElementById('ctx').value);
+        fd.append('g1', document.getElementById('g1').value);
+        fd.append('g2', document.getElementById('g2').value);
+        fd.append('g3', document.getElementById('g3').value);
+        fd.append('evt', document.getElementById('evt').value);
+
+        const res = await fetch('/api/analyze_angles', { method:'POST', body:fd });
+        const angles = await res.json();
+        document.getElementById('angles-container').innerHTML = angles.map(a => `
+            <div class="modal-box angle-card" style="width:250px" onclick="selectAngle('${a.type}', '${a.title.replace(/'/g, "\\'")}')">
+                <small>${a.type}</small><h3>${a.title}</h3><p style="font-size:0.7rem">${a.desc}</p>
+            </div>
+        `).join('');
+        document.getElementById('triptyqueModal').style.display='flex';
+        hideLoader();
+    }
+
+    async function selectAngle(type, title) {
+        document.getElementById('triptyqueModal').style.display='none';
+        document.getElementById('display-angle').innerText = 'ANGLE : ' + type;
+        document.getElementById('display-title').innerText = title;
+        showLoader("IA : Rédaction...");
+        
+        const fd = new FormData();
+        fd.append('ctx', document.getElementById('ctx').value);
+        fd.append('g1', document.getElementById('g1').value);
+        fd.append('g2', document.getElementById('g2').value);
+        fd.append('g3', document.getElementById('g3').value);
+        fd.append('evt', document.getElementById('evt').value);
+        fd.append('angle', type);
+
+        const res = await fetch('/api/generate_full', { method:'POST', body:fd });
+        const data = await res.json();
+        document.getElementById('paper').innerText = data.script.replace(/\*\*/g, '');
+        hideLoader();
+    }
+
+    async function refine() {
+        const i = document.getElementById('chatInput').value;
+        if(!i) return;
+        addChatMsg('user', i);
+        showLoader("Modification...");
+        const res = await fetch('/api/refine', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ current_script: document.getElementById('paper').innerText, instruction: i })
+        });
+        const data = await res.json();
+        document.getElementById('paper').innerText = data.script.replace(/\*\*/g, '');
+        document.getElementById('chatInput').value = "";
+        hideLoader();
     }
 
     async function saveVersion() {
         if(!currentProjectId) return alert("Chargez un projet !");
+        const note = prompt("Nommez cette version (ex: Angle Rupture V1)");
+        if(!note) return;
         const fd = new FormData();
         fd.append('content', document.getElementById('paper').innerText);
-        fd.append('note', document.getElementById('version-note').value);
+        fd.append('note', note);
         await fetch(`/api/projects/${currentProjectId}/save_version`, { method:'POST', body:fd });
-        loadProject(currentProjectId); // Refresh list
-    }
-
-    async function forkVersion(vId) {
-        await fetch(`/api/versions/${vId}/fork`, { method:'POST' });
         loadProject(currentProjectId);
     }
 </script>
