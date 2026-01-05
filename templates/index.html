@@ -278,27 +278,67 @@
         });
     }
 
-    async function loadImportedData(id) {
-        document.getElementById('importModal').style.display = 'none';
-        showLoader("Synchronisation du dossier...");
+   async function loadImportedData(id) {
+    document.getElementById('importModal').style.display = 'none';
+    showLoader("Synchronisation du dossier...");
+    
+    try {
         const res = await fetch(`/api/projects/${id}`);
         const data = await res.json();
         const raw = data.form_data;
 
+        // 1. MISE À JOUR DU BANDEAU STUDIO
+        document.getElementById('project-header').style.display = 'flex';
+        document.getElementById('version-timeline').style.display = 'block';
+        
+        document.getElementById('display-region').innerText = raw.region || "Région inconnue";
+        document.getElementById('display-title').innerText = `SCÉNARIO : ${raw.region}`;
+        document.getElementById('display-fixer').innerText = `${raw.fixer_prenom || ''} ${raw.fixer_nom || 'Anonyme'}`;
+        document.getElementById('display-date').innerText = `Reçu le ${data.date}`;
+        
+        // Gestion de l'image de la région
+        const vignette = document.getElementById('display-vignette');
+        vignette.src = raw.image_region || "https://via.placeholder.com/150?text=No+Image";
+
+        // 2. REMPLISSAGE DU FORMULAIRE TECHNIQUE (GAUCHE)
         document.getElementById('ctx').value = `${raw.pays}, ${raw.region}`;
         
         if(raw.gardiens) {
             raw.gardiens.forEach((g, i) => {
                 const target = document.getElementById(`g${i+1}`);
-                if(target) target.value = `NOM: ${g.nom}\nMETIER: ${g.fonction}\nTYPOLOGIE: (À analyser)\nSAVOIR: ${g.savoir_transmis || ''}`;
+                if(target) {
+                    target.value = `NOM: ${g.nom}\nMETIER: ${g.fonction}\nTYPOLOGIE: (À analyser)\nSAVOIR: ${g.savoir_transmis || ''}`;
+                }
             });
         }
         
         if(raw.episode_data) document.getElementById('evt').value = raw.episode_data.fete || "";
 
-        addChatMsg('ai', `Dossier "${raw.region}" chargé. L'intelligence artificielle est prête pour l'analyse dramaturgique.`);
-        hideLoader();
+        // 3. INITIALISATION DE LA TIMELINE (V1 par défaut)
+        updateTimeline([{id: 1, name: "V1 - Import Original", date: data.date}]);
+
+        addChatMsg('ai', `Projet "${raw.region}" chargé. L'historique des versions est prêt.`);
+        lucide.createIcons();
+    } catch (e) {
+        console.error(e);
+        alert("Erreur lors du chargement du dossier.");
     }
+    hideLoader();
+}
+
+// Fonction pour afficher les versions dans la colonne de gauche
+function updateTimeline(versions) {
+    const list = document.getElementById('version-list');
+    list.innerHTML = "";
+    versions.forEach(v => {
+        list.innerHTML += `
+            <div onclick="restoreVersion(${v.id})" style="padding: 10px; background: white; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05);" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='#e2e8f0'">
+                <div style="font-weight: 800; font-size: 0.75rem; color: var(--primary);">V${v.id}</div>
+                <div style="font-size: 0.6rem; color: #64748b;">${v.name}</div>
+            </div>
+        `;
+    });
+}
 
     // --- ANALYSE DES 3 ANGLES (TRIPTYQUE) ---
     async function analyzeAngles() {
