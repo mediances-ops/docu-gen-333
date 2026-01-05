@@ -202,39 +202,78 @@
     }
 
     async function loadProject(id) {
-        currentProjectId = id;
-        document.getElementById('importModal').style.display = 'none';
-        showLoader("Chargement du projet...");
+    currentProjectId = id;
+    document.getElementById('importModal').style.display = 'none';
+    showLoader("Chargement du projet...");
+    
+    try {
+        console.log("Tentative de chargement du projet ID:", id);
+        const resDetails = await fetch(`/api/projects/${id}`);
+        if (!resDetails.ok) throw new Error("Erreur serveur lors du fetch");
         
-        try {
-            const resDetails = await fetch(`/api/projects/${id}`);
-            const data = await resDetails.json();
-            const raw = data.form_data;
+        const data = await resDetails.json();
+        const raw = data.form_data || {};
 
-            document.getElementById('project-header').style.display='flex';
-            document.getElementById('display-region').innerText = raw.region || "Inconnu";
-            document.getElementById('display-title').innerText = `SCÉNARIO : ${raw.region}`;
-            document.getElementById('display-fixer').innerText = (raw.fixer_prenom || '') + ' ' + (raw.fixer_nom || '');
-            document.getElementById('display-vignette').src = raw.image_region || '';
-            document.getElementById('display-date').innerText = 'Importé le ' + data.date;
-            
-            document.getElementById('ctx').value = (raw.pays || '') + ', ' + (raw.region || '');
-            if(raw.gardiens) {
-                raw.gardiens.forEach((g, i) => {
-                    if(i<3) document.getElementById('g'+(i+1)).value = `NOM: ${g.nom}\nMETIER: ${g.fonction}\nSAVOIR: ${g.savoir_transmis || ''}`;
-                });
+        console.log("Données reçues du Bridge:", raw);
+
+        // 1. ALLUMAGE ET REMPLISSAGE DU BANDEAU STUDIO
+        const header = document.getElementById('project-header');
+        header.style.display = 'flex';
+        document.getElementById('timeline').style.display = 'block';
+
+        // Sécurité sur les noms et la région
+        const regionName = raw.region || "RÉGION INCONNUE";
+        const fixerFullName = (raw.fixer_prenom || '') + ' ' + (raw.fixer_nom || 'Non renseigné');
+        
+        document.getElementById('display-region').innerText = regionName;
+        document.getElementById('display-title').innerText = `SCÉNARIO : ${regionName}`;
+        document.getElementById('display-fixer').innerText = fixerFullName;
+        document.getElementById('display-date').innerText = 'Importé le ' + (data.date || '--/--');
+        
+        // Gestion de la vignette avec fallback si vide
+        const vignette = document.getElementById('display-vignette');
+        if (raw.image_region && raw.image_region.startsWith('http')) {
+            vignette.src = raw.image_region;
+            vignette.style.display = 'block';
+        } else {
+            vignette.src = "https://via.placeholder.com/80?text=No+Image";
+        }
+
+        // 2. REMPLISSAGE DU FORMULAIRE DE GAUCHE
+        document.getElementById('ctx').value = (raw.pays ? raw.pays + ', ' : '') + regionName;
+        
+        // Nettoyage et remplissage des 3 gardiens
+        const gardiens = raw.gardiens || [];
+        for (let i = 1; i <= 3; i++) {
+            const field = document.getElementById('g' + i);
+            if (field) {
+                if (gardiens[i - 1]) {
+                    const g = gardiens[i - 1];
+                    field.value = `NOM: ${g.nom || ''}\nMETIER: ${g.fonction || ''}\nTYPOLOGIE: (À analyser)\nSAVOIR: ${g.savoir_transmis || ''}`;
+                } else {
+                    field.value = ""; // Vide si pas de gardien
+                }
             }
-            document.getElementById('evt').value = raw.episode_data?.fete || "";
+        }
+        
+        // Évènement final
+        document.getElementById('evt').value = (raw.episode_data && raw.episode_data.fete) ? raw.episode_data.fete : "";
 
-            const resV = await fetch(`/api/projects/${id}/versions`);
-            const versions = await resV.json();
-            renderVersions(versions);
+        // 3. CHARGEMENT DE L'HISTORIQUE (VERSIONS)
+        const resV = await fetch(`/api/projects/${id}/versions`);
+        const versions = await resV.json();
+        renderVersions(versions);
 
-            addChatMsg('ai', `Projet ${raw.region} chargé.`);
-            lucide.createIcons();
-        } catch(e) { console.error(e); }
-        hideLoader();
+        addChatMsg('ai', `Dossier "${regionName}" chargé avec succès. Le studio est prêt.`);
+        lucide.createIcons();
+
+    } catch (error) {
+        console.error("Erreur critique loadProject:", error);
+        addChatMsg('ai', "❌ Erreur technique lors du chargement. Vérifiez les logs console.");
+        alert("Impossible de charger les données du projet.");
     }
+    hideLoader();
+}
 
     function renderVersions(versions) {
         const list = document.getElementById('v-list');
