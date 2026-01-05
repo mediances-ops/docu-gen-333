@@ -2,51 +2,47 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plateforme de scénarisation | DOC-OS</title>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
             --primary: #2C3E50; --accent: #E67E22; --danger: #e50914; --bg: #f3f4f6;
-            --text: #2d3748; --dark-panel: #1a202c; --handle-width: 30px;
+            --text: #2d3748; --dark-panel: #1a202c; --handle-width: 35px;
         }
 
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* HEADER HARMONISÉ */
+        /* HEADER PRO */
         header { 
             background: linear-gradient(135deg, var(--primary) 0%, #34495e 100%); 
             padding: 10px 25px; border-bottom: 3px solid var(--accent); 
             display: flex; justify-content: space-between; align-items: center; color: white; z-index: 1000;
         }
         .logo { font-weight: 800; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 1px; }
-        .header-right { display: flex; align-items: center; gap: 15px; }
 
         .workspace { display: flex; flex: 1; overflow: hidden; position: relative; }
 
-        /* SIDEBAR HISTORIQUE COULISSANTE (À GAUCHE TOUTE) */
+        /* SIDEBAR HISTORIQUE (POIGNÉE VISIBLE, CONTENU CACHÉ) */
         .sidebar-history {
             position: absolute; left: 0; top: 0; bottom: 0; width: 300px;
             background: white; border-right: 2px solid var(--accent);
-            transform: translateX(-270px); /* Cache 270px, laisse 30px pour la poignée */
+            transform: translateX(-265px); /* Cache le panneau, laisse 35px pour la poignée */
             transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 200; display: flex; box-shadow: 5px 0 15px rgba(0,0,0,0.1);
+            z-index: 500; display: flex; box-shadow: 5px 0 15px rgba(0,0,0,0.1);
         }
         .sidebar-history.open { transform: translateX(0); }
-        
-        .history-content { flex: 1; padding: 20px; overflow-y: auto; width: 270px; }
+        .history-content { flex: 1; padding: 20px; overflow-y: auto; }
         .history-handle {
             width: var(--handle-width); height: 100%; background: var(--accent);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
         }
-        .handle-text { transform: rotate(-90deg); color: white; white-space: nowrap; font-size: 0.7rem; font-weight: 900; letter-spacing: 2px; }
+        .handle-text { transform: rotate(-90deg); color: white; white-space: nowrap; font-size: 0.75rem; font-weight: 900; letter-spacing: 3px; }
 
-        /* PANEL GAUCHE : FORMULAIRE (Décalé par la poignée) */
+        /* PANEL GAUCHE : FORMULAIRE */
         .panel-left { 
             width: 320px; background: white; border-right: 1px solid #e2e8f0; 
             padding: 20px; overflow-y: auto; z-index: 10;
-            margin-left: var(--handle-width); /* Decalage pour la poignée */
+            margin-left: var(--handle-width); /* Se décale pour laisser la place à la poignée */
         }
         .input-group { margin-bottom: 12px; }
         label { display: block; font-size: 0.65rem; color: #64748b; font-weight: 700; margin-bottom: 4px; text-transform: uppercase; }
@@ -54,17 +50,13 @@
         textarea { height: 55px; resize: none; }
         h3 { font-size: 0.75rem; color: var(--primary); border-bottom: 1px solid #f1f5f9; padding-bottom: 5px; margin: 15px 0 10px 0; }
 
-        /* PANEL CENTRAL : PAPIER BIEN AU MILIEU */
+        /* PANEL CENTRAL : PAPIER CENTRÉ */
         .panel-center { 
             flex: 1; background: #cbd5e0; padding: 40px; overflow-y: auto; 
             display: flex; flex-direction: column; align-items: center; 
         }
         
-        #project-header { 
-            width: 21cm; background: white; border-radius: 8px; padding: 12px; margin-bottom: 20px; 
-            display: none; border-left: 5px solid var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
-            align-items: center; justify-content: space-between; 
-        }
+        #project-header { width: 21cm; background: white; border-radius: 8px; padding: 12px; margin-bottom: 20px; display: none; border-left: 5px solid var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.1); align-items: center; justify-content: space-between; }
         .vignette { width: 60px; height: 60px; border-radius: 4px; object-fit: cover; background: #eee; border: 1px solid #ddd; }
 
         .editor-toolbar { position: sticky; top: 0; background: white; padding: 8px 20px; border-radius: 50px; border: 2px solid var(--primary); display: flex; gap: 15px; margin-bottom: 20px; z-index: 40; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
@@ -77,41 +69,39 @@
         .msg.ai { background: #2d3748; border-left: 3px solid var(--accent); }
         .msg.user { background: var(--accent); text-align: right; }
 
-        /* BADGES */
-        .status-badge { padding: 4px 12px; border-radius: 20px; background: rgba(255,255,255,0.15); font-size: 0.7rem; font-weight: bold; border: 1px solid rgba(255,255,255,0.3); }
+        .status-badge { padding: 4px 12px; border-radius: 20px; background: rgba(255,255,255,0.15); font-size: 0.65rem; font-weight: bold; border: 1px solid rgba(255,255,255,0.3); }
         .active-dot { color: #2ecc71; margin-right: 5px; }
 
-        .btn { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; display: flex; align-items: center; gap: 8px; font-size: 0.8rem; }
+        .btn { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; font-size: 0.75rem; }
         .btn-gen { background: var(--danger); color: white; width: 100%; margin-top: 10px; }
         .btn-top { background: white; color: var(--primary); }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 5000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
         .modal-box { background: white; padding: 25px; border-radius: 12px; width: 450px; color: var(--text); }
         .angle-card { border: 2px solid #e2e8f0; padding: 15px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; }
+        .angle-card:hover { border-color: var(--accent); background: #fffaf0; }
 
         #loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 62, 80, 0.95); z-index: 9999; flex-direction: column; justify-content: center; align-items: center; color: white; }
-        .spinner { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 10px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-<div id="loader"><div class="spinner"></div><div id="loader-text">Studio en cours...</div></div>
+<div id="loader"><div style="border:4px solid #fff; border-top:4px solid var(--accent); border-radius:50%; width:40px; height:40px; animation:spin 1s linear infinite;"></div><div id="loader-text" style="margin-top:10px; font-weight:bold;">Analyse...</div></div>
 
 <header>
     <div class="logo"><i data-lucide="clapperboard"></i> Plateforme de scénarisation</div>
-    <div class="header-right">
-        <button class="btn btn-top" onclick="openImportModal()"><i data-lucide="download-cloud"></i> CHANGER UN IMPORT</button>
-        <div class="status-badge"><span class="active-dot">●</span> BRIDGE CONNECTÉ</div>
+    <div style="display:flex; align-items:center; gap:12px;">
+        <button class="btn btn-top" onclick="openImportModal()"><i data-lucide="download-cloud"></i> CHARGER UN IMPORT</button>
+        <div class="status-badge"><span class="active-dot">●</span> BRIDGE ACTIF</div>
         <div id="display-version-tag" class="status-badge">VERSION : --</div>
     </div>
 </header>
 
 <div class="workspace">
-    <!-- SIDEBAR HISTORIQUE (POIGNÉE + CONTENU) -->
+    <!-- SIDEBAR HISTORIQUE (Cachée sauf poignée) -->
     <div class="sidebar-history" id="historySidebar">
         <div class="history-content">
-            <h4 style="font-size:0.8rem; border-bottom:2px solid var(--accent); padding-bottom:5px; color: var(--primary);">HISTORIQUE DU PROJET</h4>
+            <h4 style="font-size:0.8rem; border-bottom:2px solid var(--accent); padding-bottom:5px; color: var(--primary);">HISTORIQUE</h4>
             <div id="v-list" style="margin-top:15px;"></div>
         </div>
         <div class="history-handle" onclick="toggleHistory()">
@@ -122,15 +112,12 @@
     <!-- PANEL GAUCHE : FORMULAIRE -->
     <div class="panel-left">
         <div class="input-group"><label>🌍 CONTEXTE</label><input type="text" id="ctx"></div>
-        
         <h3><i data-lucide="users" style="width:12px;"></i> LES 3 GARDIENS</h3>
         <div class="input-group"><label>G1 (MATIÈRE)</label><textarea id="g1"></textarea></div>
         <div class="input-group"><label>G2 (TECHNIQUE)</label><textarea id="g2"></textarea></div>
         <div class="input-group"><label>G3 (LIEN)</label><textarea id="g3"></textarea></div>
-        
         <h3><i data-lucide="sparkles" style="width:12px;"></i> CONVERGENCE</h3>
         <div class="input-group"><label>La Fête / Rituel (+1)</label><textarea id="evt"></textarea></div>
-        
         <button class="btn btn-gen" onclick="analyzeAngles()"><i data-lucide="wand-2"></i> 1. ANALYSER LES ANGLES</button>
     </div>
 
@@ -140,43 +127,41 @@
             <div style="display:flex; align-items:center; gap:15px;">
                 <img id="display-vignette" class="vignette" src="">
                 <div>
-                    <div id="display-region" style="font-size:0.6rem; color:var(--accent); font-weight:800; letter-spacing:1px; text-transform:uppercase;">REGION</div>
-                    <h2 id="display-title" style="margin:0; font-size:1.1rem; font-weight:900;">Titre du projet</h2>
+                    <div id="display-region" style="font-size:0.6rem; color:var(--accent); font-weight:800; text-transform:uppercase;">Région</div>
+                    <h2 id="display-title" style="margin:0; font-size:1.1rem; font-weight:900;">Titre</h2>
                     <div style="font-size:0.75rem; color:#64748b;">Correspondant : <span id="display-fixer" style="font-weight:bold;">...</span></div>
                 </div>
             </div>
             <div style="text-align:right">
                 <div id="display-angle" style="font-size:0.7rem; font-weight:bold; color:var(--accent)">ANGLE : --</div>
-                <div id="display-date" style="font-size:0.6rem; color:#999">Importé le --</div>
+                <div id="display-date" style="font-size:0.6rem; color:#999">--/--/----</div>
             </div>
         </div>
-
         <div class="editor-toolbar">
             <button onclick="document.execCommand('bold')">B</button>
             <button onclick="document.execCommand('italic')">I</button>
             <div style="width:1px; background:#e2e8f0; height:15px;"></div>
-            <button style="color:var(--accent); font-weight:bold; border:none; background:none; cursor:pointer;" onclick="saveVersion()">💾 SAUVEGARDER V2</button>
+            <button style="color:var(--accent); font-weight:bold; border:none; background:none; cursor:pointer;" onclick="saveVersion()">💾 SAUVEGARDER</button>
         </div>
-
         <div id="paper" class="paper" contenteditable="true"></div>
     </div>
 
     <!-- PANEL DROIT : CHATBOT -->
     <div class="panel-right">
-        <div class="chat-history" id="chatHist"><div class="msg ai">Studio prêt. Chargez un dossier terrain.</div></div>
+        <div class="chat-history" id="chatHist"><div class="msg ai">Studio prêt.</div></div>
         <div style="padding:15px; background:#111;">
-            <textarea id="chatInput" placeholder="Modifier une scène..."></textarea>
-            <button class="btn btn-gen" style="background:var(--accent); margin-top:10px;" onclick="refine()">MODIFIER LE SCRIPT</button>
+            <textarea id="chatInput" placeholder="Modifier..."></textarea>
+            <button class="btn btn-gen" style="background:var(--accent); margin-top:10px;" onclick="refine()">MODIFIER</button>
         </div>
     </div>
 </div>
 
-<!-- MODALS -->
+<!-- MODAL IMPORT -->
 <div id="importModal" class="modal">
     <div class="modal-box">
-        <h3 style="margin-top:0">Dossiers Importés (Bridge)</h3>
+        <h3 style="margin-top:0; color:var(--primary);">Dossiers Importés</h3>
         <div id="import-list"></div>
-        <button class="btn" style="background:#eee; margin-top:15px; width:100%; color:var(--primary);" onclick="document.getElementById('importModal').style.display='none'">FERMER</button>
+        <button class="btn" style="background:#eee; margin-top:15px; width:100%;" onclick="document.getElementById('importModal').style.display='none'">FERMER</button>
     </div>
 </div>
 
@@ -187,110 +172,70 @@
     let currentProjectId = null;
 
     function toggleHistory() { document.getElementById('historySidebar').classList.toggle('open'); }
+    function showLoader(t) { document.getElementById('loader-text').innerText=t; document.getElementById('loader').style.display='flex'; }
+    function hideLoader() { document.getElementById('loader').style.display='none'; }
+    function addChatMsg(r, t) { const d=document.createElement('div'); d.className='msg '+r; d.innerText=t; const h=document.getElementById('chatHist'); h.appendChild(d); h.scrollTop=h.scrollHeight; }
 
     async function openImportModal() {
         document.getElementById('importModal').style.display='flex';
         const res = await fetch('/api/projects');
         const projects = await res.json();
         const list = document.getElementById('import-list');
-        list.innerHTML = projects.length === 0 ? "<p>Aucun import détecté.</p>" : projects.map(p => `
-            <div class="angle-card" onclick="loadProject(${p.id})">
-                <div style="float:right; font-size:0.6rem; color:var(--accent); font-weight:bold;">${p.date}</div>
-                <b>${p.title}</b><br><small>Région : ${p.region}</small>
+        list.innerHTML = projects.map(p => `
+            <div class="angle-card" onclick="loadProjectData(${p.id})">
+                <small style="float:right;">${p.date}</small>
+                <b>${p.title}</b><br><small>${p.region}</small>
             </div>
         `).join('');
     }
 
-    async function loadProject(id) {
-    currentProjectId = id;
-    document.getElementById('importModal').style.display = 'none';
-    showLoader("Chargement du projet...");
-    
-    try {
-        console.log("Tentative de chargement du projet ID:", id);
-        const resDetails = await fetch(`/api/projects/${id}`);
-        if (!resDetails.ok) throw new Error("Erreur serveur lors du fetch");
+    async function loadProjectData(id) {
+        console.log("Chargement projet ID:", id);
+        currentProjectId = id;
+        document.getElementById('importModal').style.display = 'none';
+        showLoader("Synchronisation...");
         
-        const data = await resDetails.json();
-        const raw = data.form_data || {};
+        try {
+            const res = await fetch(`/api/projects/${id}`);
+            const data = await res.json();
+            const raw = data.form_data;
 
-        console.log("Données reçues du Bridge:", raw);
-
-        // 1. ALLUMAGE ET REMPLISSAGE DU BANDEAU STUDIO
-        const header = document.getElementById('project-header');
-        header.style.display = 'flex';
-        document.getElementById('timeline').style.display = 'block';
-
-        // Sécurité sur les noms et la région
-        const regionName = raw.region || "RÉGION INCONNUE";
-        const fixerFullName = (raw.fixer_prenom || '') + ' ' + (raw.fixer_nom || 'Non renseigné');
-        
-        document.getElementById('display-region').innerText = regionName;
-        document.getElementById('display-title').innerText = `SCÉNARIO : ${regionName}`;
-        document.getElementById('display-fixer').innerText = fixerFullName;
-        document.getElementById('display-date').innerText = 'Importé le ' + (data.date || '--/--');
-        
-        // Gestion de la vignette avec fallback si vide
-        const vignette = document.getElementById('display-vignette');
-        if (raw.image_region && raw.image_region.startsWith('http')) {
-            vignette.src = raw.image_region;
-            vignette.style.display = 'block';
-        } else {
-            vignette.src = "https://via.placeholder.com/80?text=No+Image";
-        }
-
-        // 2. REMPLISSAGE DU FORMULAIRE DE GAUCHE
-        document.getElementById('ctx').value = (raw.pays ? raw.pays + ', ' : '') + regionName;
-        
-        // Nettoyage et remplissage des 3 gardiens
-        const gardiens = raw.gardiens || [];
-        for (let i = 1; i <= 3; i++) {
-            const field = document.getElementById('g' + i);
-            if (field) {
-                if (gardiens[i - 1]) {
-                    const g = gardiens[i - 1];
-                    field.value = `NOM: ${g.nom || ''}\nMETIER: ${g.fonction || ''}\nTYPOLOGIE: (À analyser)\nSAVOIR: ${g.savoir_transmis || ''}`;
-                } else {
-                    field.value = ""; // Vide si pas de gardien
-                }
+            // 1. Allumage Header
+            document.getElementById('project-header').style.display='flex';
+            document.getElementById('display-region').innerText = raw.region || "Inconnue";
+            document.getElementById('display-title').innerText = `SCÉNARIO : ${raw.region}`;
+            document.getElementById('display-fixer').innerText = (raw.fixer_prenom || '') + ' ' + (raw.fixer_nom || '');
+            document.getElementById('display-vignette').src = raw.image_region || '';
+            document.getElementById('display-date').innerText = data.date;
+            
+            // 2. Remplissage Formulaire
+            document.getElementById('ctx').value = (raw.pays || '') + ', ' + (raw.region || '');
+            if(raw.gardiens) {
+                raw.gardiens.forEach((g, i) => {
+                    if(i<3) document.getElementById('g'+(i+1)).value = `NOM: ${g.nom}\nMETIER: ${g.fonction}\nSAVOIR: ${g.savoir_transmis || ''}`;
+                });
             }
-        }
-        
-        // Évènement final
-        document.getElementById('evt').value = (raw.episode_data && raw.episode_data.fete) ? raw.episode_data.fete : "";
+            document.getElementById('evt').value = raw.episode_data?.fete || "";
 
-        // 3. CHARGEMENT DE L'HISTORIQUE (VERSIONS)
-        const resV = await fetch(`/api/projects/${id}/versions`);
-        const versions = await resV.json();
-        renderVersions(versions);
+            // 3. Versions
+            const resV = await fetch(`/api/projects/${id}/versions`);
+            const versions = await resV.json();
+            renderVersions(versions);
 
-        addChatMsg('ai', `Dossier "${regionName}" chargé avec succès. Le studio est prêt.`);
-        lucide.createIcons();
-
-    } catch (error) {
-        console.error("Erreur critique loadProject:", error);
-        addChatMsg('ai', "❌ Erreur technique lors du chargement. Vérifiez les logs console.");
-        alert("Impossible de charger les données du projet.");
+            addChatMsg('ai', `Projet ${raw.region} chargé.`);
+        } catch(e) { console.error(e); alert("Erreur chargement."); }
+        hideLoader();
     }
-    hideLoader();
-}
 
     function renderVersions(versions) {
         const list = document.getElementById('v-list');
-        list.innerHTML = versions.length === 0 ? "<p style='font-size:0.7rem; color:#999;'>Aucune version.</p>" : versions.map(v => `
-            <div class="v-item" onclick="loadVersion(${v.id})" style="border-left:3px solid var(--accent);">
-                <div style="display:flex; justify-content:space-between;"><b>V${v.number}</b> <span style="font-size:0.5rem; background:#eee; padding:2px 5px; border-radius:4px;">${v.status}</span></div>
-                <div style="font-size:0.6rem; margin-top:3px; opacity:0.7;">${v.date}</div>
-                <div style="font-size:0.6rem; font-style:italic; margin-top:3px; overflow:hidden; text-overflow:ellipsis;">"${v.note || ''}"</div>
-            </div>
-        `).join('');
-        if(versions.length > 0) document.getElementById('display-version-tag').innerText = "VERSION : V" + versions[0].number;
-        else document.getElementById('display-version-tag').innerText = "VERSION : EN COURS";
+        list.innerHTML = versions.map(v => `<div class="v-item" onclick="alert('Chargement version ${v.number}')"><b>V${v.number}</b><br><small>${v.date}</small></div>`).join('');
+        document.getElementById('display-version-tag').innerText = versions.length > 0 ? "VERSION : V" + versions[0].number : "VERSION : EN COURS";
     }
 
     async function analyzeAngles() {
         if(!document.getElementById('ctx').value) return alert("Chargez un dossier.");
-        showLoader("Analyse des angles...");
+        showLoader("IA : Analyse...");
         const fd = new FormData();
         fd.append('ctx', document.getElementById('ctx').value);
         fd.append('g1', document.getElementById('g1').value);
@@ -298,19 +243,14 @@
         fd.append('g3', document.getElementById('g3').value);
         fd.append('evt', document.getElementById('evt').value);
 
-        try {
-            const res = await fetch('/api/analyze_angles', { method:'POST', body:fd });
-            const angles = await res.json();
-            document.getElementById('angles-container').innerHTML = angles.map(a => `
-                <div class="modal-box angle-card" style="width:280px" onclick="selectAngle('${a.type}', '${a.title.replace(/'/g, "\\'")}')">
-                    <div style="color:var(--accent); font-weight:bold; font-size:0.6rem;">VISION ${a.type}</div>
-                    <h2 style="font-size:1.1rem; margin:8px 0;">${a.title}</h2>
-                    <p style="font-size:0.75rem; color:#64748b; line-height:1.4;">${a.desc}</p>
-                    <button class="btn btn-gen" style="font-size:0.7rem; background:var(--primary); margin-top:10px;">SÉLECTIONNER</button>
-                </div>
-            `).join('');
-            document.getElementById('triptyqueModal').style.display='flex';
-        } catch(e) { alert("Erreur IA"); }
+        const res = await fetch('/api/analyze_angles', { method:'POST', body:fd });
+        const angles = await res.json();
+        document.getElementById('angles-container').innerHTML = angles.map(a => `
+            <div class="modal-box angle-card" style="width:250px" onclick="selectAngle('${a.type}', '${a.title.replace(/'/g, "\\'")}')">
+                <small>${a.type}</small><h3>${a.title}</h3><p style="font-size:0.7rem">${a.desc}</p>
+            </div>
+        `).join('');
+        document.getElementById('triptyqueModal').style.display='flex';
         hideLoader();
     }
 
@@ -318,8 +258,7 @@
         document.getElementById('triptyqueModal').style.display='none';
         document.getElementById('display-angle').innerText = 'ANGLE : ' + type;
         document.getElementById('display-title').innerText = title;
-        showLoader(`Rédaction (${type})...`);
-        
+        showLoader("IA : Rédaction...");
         const fd = new FormData();
         fd.append('ctx', document.getElementById('ctx').value);
         fd.append('g1', document.getElementById('g1').value);
@@ -327,7 +266,6 @@
         fd.append('g3', document.getElementById('g3').value);
         fd.append('evt', document.getElementById('evt').value);
         fd.append('angle', type);
-
         const res = await fetch('/api/generate_full', { method:'POST', body:fd });
         const data = await res.json();
         document.getElementById('paper').innerText = data.script.replace(/\*\*/g, '');
@@ -338,27 +276,29 @@
         const i = document.getElementById('chatInput').value;
         if(!i) return;
         addChatMsg('user', i);
-        document.getElementById('chatInput').value = "";
-        showLoader("Modification...");
+        showLoader("IA travaille...");
         const res = await fetch('/api/refine', {
             method:'POST', headers:{'Content-Type':'application/json'},
             body: JSON.stringify({ current_script: document.getElementById('paper').innerText, instruction: i })
         });
         const data = await res.json();
         document.getElementById('paper').innerText = data.script.replace(/\*\*/g, '');
+        document.getElementById('chatInput').value = "";
         hideLoader();
     }
 
     async function saveVersion() {
         if(!currentProjectId) return alert("Chargez un projet !");
-        const note = prompt("Nommez cette version (ex: Angle Rupture V1)");
+        const note = prompt("Note pour cette version :");
         if(!note) return;
         const fd = new FormData();
         fd.append('content', document.getElementById('paper').innerText);
         fd.append('note', note);
         await fetch(`/api/projects/${currentProjectId}/save_version`, { method:'POST', body:fd });
-        loadProject(currentProjectId);
+        loadProjectData(currentProjectId);
     }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
 </script>
 </body>
 </html>
