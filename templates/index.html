@@ -270,30 +270,46 @@
     }
 
     async function analyzeAngles() {
-        if(!document.getElementById('ctx').value) return alert("Chargez un dossier d'abord.");
-        showLoader("IA : Analyse des trajectoires...");
-        const fd = new FormData();
-        fd.append('ctx', document.getElementById('ctx').value);
-        fd.append('g1', document.getElementById('g1').value);
-        fd.append('g2', document.getElementById('g2').value);
-        fd.append('g3', document.getElementById('g3').value);
-        fd.append('evt', document.getElementById('evt').value);
+    const ctxVal = document.getElementById('ctx').value;
+    if(!ctxVal) return alert("Veuillez d'abord charger un import terrain.");
 
-        try {
-            const res = await fetch('/api/analyze_angles', { method:'POST', body:fd });
-            const angles = await res.json();
-            document.getElementById('angles-container').innerHTML = angles.map(a => `
-                <div class="modal-box angle-card" style="width:280px" onclick="selectAngle('${a.type}', '${a.title.replace(/'/g, "\\'")}')">
-                    <div style="color:var(--accent); font-weight:bold; font-size:0.6rem;">VISION ${a.type}</div>
-                    <h2 style="font-size:1.1rem; margin:8px 0;">${a.title}</h2>
-                    <p style="font-size:0.75rem; color:#64748b; line-height:1.4;">${a.desc}</p>
-                    <button class="btn btn-gen" style="font-size:0.7rem; background:var(--primary); margin-top:10px;">SÉLECTIONNER</button>
-                </div>
-            `).join('');
-            document.getElementById('triptyqueModal').style.display='flex';
-        } catch(e) { alert("Erreur IA"); }
-        hideLoader();
+    showLoader("L'IA analyse les trajectoires...");
+    
+    const fd = new FormData();
+    fd.append('ctx', ctxVal);
+    fd.append('g1', document.getElementById('g1').value);
+    fd.append('g2', document.getElementById('g2').value);
+    fd.append('g3', document.getElementById('g3').value);
+    fd.append('evt', document.getElementById('evt').value);
+
+    try {
+        const res = await fetch('/api/analyze_angles', { method:'POST', body:fd });
+        const angles = await res.json();
+        
+        // Si le serveur a renvoyé une erreur formatée
+        if (angles[0] && angles[0].type === "ERREUR") {
+            alert("Désolé, l'IA rencontre une difficulté : " + angles[0].desc);
+            hideLoader();
+            return;
+        }
+
+        const container = document.getElementById('angles-container');
+        container.innerHTML = angles.map(a => `
+            <div class="modal-box angle-card" style="width:280px" onclick="selectAngle('${a.type}', '${a.title.replace(/'/g, "\\'")}')">
+                <div style="color:var(--accent); font-weight:bold; font-size:0.6rem;">VISION ${a.type}</div>
+                <h2 style="font-size:1.1rem; margin:8px 0;">${a.title}</h2>
+                <p style="font-size:0.75rem; color:#64748b; line-height:1.4;">${a.desc}</p>
+                <button class="btn btn-gen" style="font-size:0.7rem; background:var(--primary); margin-top:10px;">SÉLECTIONNER</button>
+            </div>
+        `).join('');
+        
+        document.getElementById('triptyqueModal').style.display='flex';
+    } catch(e) {
+        console.error(e);
+        alert("Erreur de connexion au cerveau IA. Vérifiez vos Logs Railway.");
     }
+    hideLoader();
+}
 
     async function selectAngle(type, title) {
         document.getElementById('triptyqueModal').style.display='none';
